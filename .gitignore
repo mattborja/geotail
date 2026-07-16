@@ -1,6 +1,15 @@
 # IP2Location databases (proprietary redistribution not allowed)
 data/*.BIN
 data/*.bin
+data/LICENSE_LITE.TXT
+
+# Third-party log-sample datasets (loghub: research/academic-use license,
+# redistribution not permitted — see README's "Sample data" section)
+samples/
+
+# Secrets
+.env
+.env.*
 
 # Python
 __pycache__/

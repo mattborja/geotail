@@ -98,8 +98,8 @@ unique IPs: {stats.unique_ips:,} · suspicious: {stats.proxy_ratio:.1%}</p>
 <h2>Top offenders</h2>
 <table><tr><th>IP</th><th>Hits</th><th>Location</th><th>Network</th><th>Flags</th></tr>
 {offender_rows}</table>
-<p class="meta">This site or product includes IP2Location LITE data available from
-<a href="https://lite.ip2location.com">https://lite.ip2location.com</a>.</p>
+<p class="meta">geotail uses the IP2Location LITE database for
+<a href="https://lite.ip2location.com">IP geolocation</a>.</p>
 <script src="{_LEAFLET_JS}"></script>
 <script>
 const markers = {json.dumps(markers)};
