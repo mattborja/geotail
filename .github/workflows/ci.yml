@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: pip install -e '.[dev]'
+      - name: Lint
+        run: ruff check src tests
+      - name: Type-check
+        run: mypy
+      - name: Test (no network, no BIN files)
+        run: pytest -q
+      - name: Smoke-test CLI
+        run: |
+          geotail --about
+          geotail --demo --json --file sample.log | head -5
+          if geotail --json --file sample.log 2>err.txt; then
+            echo "expected non-zero exit without a database" >&2
+            exit 1
+          fi
+          grep -q "lite.ip2location.com" err.txt
