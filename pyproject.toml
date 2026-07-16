@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geotail"
+version = "0.1.0"
+description = "Offline IP intelligence for your logs: live terminal dashboard of geolocation and proxy/threat data, powered by IP2Location LITE."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Matt Borja" }]
+requires-python = ">=3.11"
+keywords = ["ip2location", "geolocation", "logs", "tui", "security", "proxy"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: Log Analysis",
+    "Topic :: Security",
+]
+dependencies = [
+    "IP2Location>=8.10,<9",
+    "IP2Proxy>=3.4,<4",
+    "rich>=13.0,<16",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "mypy>=1.10",
+    "ruff>=0.5",
+]
+
+[project.scripts]
+geotail = "geotail.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/mattborja/geotail"
+Issues = "https://github.com/mattborja/geotail/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+geotail = ["demo.log"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: tests that require real IP2Location/IP2Proxy BIN files (skipped when absent)",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src"]
+
+[[tool.mypy.overrides]]
+module = ["IP2Location.*", "IP2Proxy.*", "IP2Location", "IP2Proxy"]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
