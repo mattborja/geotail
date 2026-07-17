@@ -5,18 +5,18 @@
 `geotail` reads server logs, enriches every source IP with geolocation and proxy/VPN/Tor
 intelligence from local [IP2Location LITE](https://lite.ip2location.com) databases, and renders a
 live terminal dashboard of where traffic comes from and how much of it is suspicious. No API keys,
-no network calls, no data leaving your box.
+no network calls — nothing leaves your machine.
 
 ![geotail TUI dashboard](docs/img/tui-demo.svg)
 
 *`geotail --demo --file sample.log --tui` — top countries, top networks, and a top-offenders
 table with TOR/VPN/proxy flags, updating live as lines arrive.*
 
-## 30-second quickstart
+## Quickstart
 
 ```bash
 pipx install geotail   # or: pip install geotail / uvx geotail
-geotail --demo         # live dashboard, zero external files needed
+geotail --demo         # live dashboard with bundled demo data, no downloads
 ```
 
 For real lookups, download two free LITE databases from
@@ -66,22 +66,21 @@ geotail --file sample.log --report report.html
 - **Demo mode** — `--demo` runs on bundled deterministic fake data, so you can try everything
   before downloading a single database.
 
-## Demo script
+## Examples
 
-A walkthrough for presenting `geotail` live. Everything except step 6 runs in `--demo` mode
-(bundled synthetic data), so nothing beyond this repo is required.
+Everything below except the last example runs in `--demo` mode (bundled synthetic data), so no
+databases are needed to follow along.
 
-### 1. The hook
+### Dashboard from a log file
 
 ```bash
 geotail --demo --file sample.log --tui
 ```
 
-No API keys, no BIN downloads — nothing to explain before the payoff. Let it sit a few seconds:
-top countries, top networks, and a top-offenders table with TOR/VPN/proxy flags in red. Ctrl-C to
-stop.
+Renders the dashboard shown at the top of this README: top countries, top networks, and a
+top-offenders table with TOR/VPN/proxy flags. Ctrl-C to stop.
 
-### 2. Real-world log formats
+### Real-world log formats
 
 ```bash
 geotail --demo --file samples/loghub/OpenSSH/OpenSSH_2k.log --tui
@@ -89,61 +88,55 @@ geotail --demo --file samples/loghub/OpenSSH/OpenSSH_2k.log --tui
 
 ![geotail TUI against a real OpenSSH auth log](docs/img/tui-openssh.svg)
 
-*1,732 of 1,999 lines parsed from a real leaked SSH auth log (the [loghub](https://github.com/logpai/loghub)
-research dataset — see [Sample data](#sample-data) to fetch it) — a brute-force IP jumps straight
-to the top of "Top offenders," flagged VPN.*
+*1,732 of 1,999 lines parsed from a real SSH auth log (the [loghub](https://github.com/logpai/loghub)
+research dataset — see [Sample data](#sample-data) to fetch it). A brute-forcing IP rises to the
+top of the offenders table, flagged VPN.*
 
-`Linux/Linux_2k.log` from the same dataset also works well (~62% extraction); `Apache/Apache_2k.log`
-won't — it's an error log with no client IPs.
+`Linux/Linux_2k.log` from the same dataset also parses well (~62% of lines yield an IP);
+`Apache/Apache_2k.log` does not — it's an error log with no client IPs.
 
-### 3. Prove it's a real tailer, not a toy
+### Streaming input
 
 ```bash
 tail -f sample.log | geotail --demo
 ```
 
-Or simulate live traffic:
+To simulate live traffic:
 
 ```bash
 while true; do shuf -n1 sample.log; sleep 0.3; done | geotail --demo
 ```
 
-Sells "pipe your logs in" — the exact pitch at the top of this README.
-
-### 4. JSONL for the SIEM/jq crowd
+### Filtering JSONL output
 
 ```bash
 geotail --demo --file sample.log --json | jq 'select(.is_proxy)'
 ```
 
-### 5. The leave-behind artifact
+### HTML report
 
 ```bash
-geotail --demo --file sample.log --report demo_report.html && open demo_report.html
+geotail --demo --file sample.log --report report.html
 ```
 
-A self-contained HTML page with a Leaflet world map and summary tables — good for a follow-up
-email or a second screen.
+Writes a self-contained HTML page with a Leaflet world map and summary tables.
 
-### 6. Real data, if someone asks "is this staged?"
+### Real database lookups
+
+With the LITE databases in `./data/` (see [Quickstart](#quickstart)), drop `--demo`:
 
 ```bash
 geotail --file sample.log --tui
 ```
 
-![geotail TUI against real IP2Location LITE data](docs/img/tui-real.svg)
+![geotail TUI with IP2Location LITE data](docs/img/tui-real.svg)
 
-*Same `sample.log`, real DB11/PX11 lookups instead of `--demo` — real IPs resolve to their real
-ASN/city, and the Top networks panel is sparser since LITE DB11 doesn't carry ASN/ISP (the
-commercial tier does).*
+*The same `sample.log` resolved against real DB11/PX11 data. The Top networks panel is sparser
+than in demo mode because LITE DB11 does not carry ASN/ISP fields (the commercial tier does).*
 
-> **Note:** an IPv6 address looked up against the IPv4-only LITE DB11 simply comes back as
-> `unknown` — the library's `"IPV6 ADDRESS MISSING IN IPV4 BIN"` sentinel is normalized away like
-> any other missing field. Grab the IPv6-inclusive BIN from the LITE site if you want IPv6
-> geolocation.
-
-**Suggested flow:** 1 → 2 → 3 → 4, ending on 5 as the takeaway. Bring in 6 only if someone
-questions whether the data is real.
+> **Note:** an IPv6 address looked up against the IPv4-only LITE DB11 comes back as `unknown` —
+> the library's `"IPV6 ADDRESS MISSING IN IPV4 BIN"` sentinel is normalized like any other
+> missing field. Use the IPv6-inclusive BIN if you need IPv6 geolocation.
 
 ## CLI reference
 
@@ -192,7 +185,7 @@ log lines ──▶ parsers.py ──▶ engine.Enricher ──▶ stats.StatsCo
                         └─ fake.py         ← deterministic in-memory data (--demo, tests)
 ```
 
-The enrichment engine only knows about two tiny `Protocol`s (`GeoProvider`, `ProxyProvider`), each
+The enrichment engine depends on two small `Protocol`s (`GeoProvider`, `ProxyProvider`), each
 with a single `lookup(ip) -> dict` method. The real implementations wrap the official
 [IP2Location](https://pypi.org/project/IP2Location/) and
 [IP2Proxy](https://pypi.org/project/IP2Proxy/) libraries reading local BIN files; the fake
@@ -217,13 +210,13 @@ print(record.country_name, record.is_proxy, record.to_dict())
 ## Sample data
 
 `sample.log` (bundled in this repo, MIT-licensed like the rest of it) is enough to run every
-command above except step 2 of the demo script. That step additionally uses the
+example above except [Real-world log formats](#real-world-log-formats), which uses the
 [loghub](https://github.com/logpai/loghub) research dataset — a collection of real-world system
 logs (OpenSSH, Linux, Apache, HDFS, and more) maintained by the LogPAI group.
 
 loghub's data is **not bundled in this repo**: its license permits use for research/academic work
 only and requires attribution on redistribution (see [Attribution](#attribution) below), so
-`samples/` is gitignored here rather than shipped. Fetch it yourself if you want that demo step:
+`samples/` is gitignored here rather than shipped. To fetch it:
 
 ```bash
 git clone --depth 1 https://github.com/logpai/loghub samples/loghub
@@ -249,9 +242,9 @@ database is present in `./data/`.
 
 > geotail uses the IP2Location LITE database for [IP geolocation](https://lite.ip2location.com).
 
-This is the exact acknowledgment IP2Location's LITE license requires (see the `LICENSE_LITE.TXT`
-included in each database download) — displayed in the app itself via `geotail --about` and in
-every `--report` HTML footer, not just here.
+This is the acknowledgment IP2Location's LITE license requires (see the `LICENSE_LITE.TXT`
+included in each database download). The same notice is printed by `geotail --about` and included
+in the `--report` HTML footer.
 
 If you use the `samples/loghub/` dataset (see [Sample data](#sample-data) above), loghub's license
 asks that you cite it:
