@@ -15,9 +15,11 @@ table with TOR/VPN/proxy flags, updating live as lines arrive.*
 ## Quickstart
 
 ```bash
-pipx install geotail   # or: pip install geotail / uvx geotail
+pipx install git+https://github.com/mattborja/geotail
 geotail --demo         # live dashboard with bundled demo data, no downloads
 ```
+
+(`pip install git+https://github.com/mattborja/geotail` works too. Not yet on PyPI.)
 
 For real lookups, download two free LITE databases from
 **<https://lite.ip2location.com>** (free account, no credit card, attribution required):
