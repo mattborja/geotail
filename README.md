@@ -137,10 +137,10 @@ geotail --file sample.log --tui
 ASN/city, and the Top networks panel is sparser since LITE DB11 doesn't carry ASN/ISP (the
 commercial tier does).*
 
-> **Known quirk:** an IPv6 address looked up against the IPv4-only LITE DB11 makes the
-> IP2Location library return the literal string `"IPV6 ADDRESS MISSING IN IPV4 BIN"`, which isn't
-> in `_clean()`'s sentinel list (`src/geotail/providers/ip2location.py`) and leaks through as a
-> fake country name. Avoid IPv6 traffic in a BIN-backed demo until that's fixed.
+> **Note:** an IPv6 address looked up against the IPv4-only LITE DB11 simply comes back as
+> `unknown` — the library's `"IPV6 ADDRESS MISSING IN IPV4 BIN"` sentinel is normalized away like
+> any other missing field. Grab the IPv6-inclusive BIN from the LITE site if you want IPv6
+> geolocation.
 
 **Suggested flow:** 1 → 2 → 3 → 4, ending on 5 as the takeaway. Bring in 6 only if someone
 questions whether the data is real.
