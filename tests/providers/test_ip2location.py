@@ -30,6 +30,8 @@ class TestClean:
             "N/A",
             "NOT SUPPORTED",
             "INVALID IP ADDRESS",
+            "MISSING IP ADDRESS",
+            "IPV6 ADDRESS MISSING IN IPV4 BIN",
             "This parameter is unavailable in selected .BIN data file. "
             "Please upgrade data file.",
         ],

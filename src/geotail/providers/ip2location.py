@@ -17,7 +17,15 @@ import IP2Proxy
 
 # Values the IP2Location/IP2Proxy libraries use to mean "no data".
 _SENTINEL_PREFIXES = ("this parameter is unavailable",)
-_SENTINEL_VALUES = {"", "-", "not supported", "invalid ip address", "n/a"}
+_SENTINEL_VALUES = {
+    "",
+    "-",
+    "not supported",
+    "invalid ip address",
+    "missing ip address",
+    "ipv6 address missing in ipv4 bin",
+    "n/a",
+}
 
 
 def _clean(value: Any) -> Any:

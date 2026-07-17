@@ -24,7 +24,7 @@ class TestAbout:
         assert main(["--about"]) == 0
         out = capsys.readouterr().out
         assert geotail.__version__ in out
-        assert "IP2Location LITE data" in out
+        assert "uses the IP2Location LITE database" in out
         assert "https://lite.ip2location.com" in out
 
 
